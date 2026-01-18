@@ -72,3 +72,9 @@ app.all('/proxy/*', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`Сервер запущен на порту ${PORT}`);
 });
+
+// === МАРШРУТ 3: Проверка жизни (Health Check) ===
+// Этот маршрут нужен для UptimeRobot, чтобы будить сервер
+app.get('/ping', (req, res) => {
+    res.status(200).send('Pong! Server is alive.');
+});
