@@ -42,25 +42,27 @@ app.post('/auth', async (req, res) => {
 
 // === МАРШРУТ 2: Универсальный прокси (для получения меню, заказов и т.д.) ===
 // Пример вызова: ваш_сайт -> /proxy/api/1/organizations -> сервер IIKO
-// ОБРАТИТЕ ВНИМАНИЕ: мы заменили '/proxy/*' на '/proxy/(.*)'
-app.all('/proxy/(.*)', async (req, res) => {
-    const urlPath = req.params[0]; // Это сработает правильно с (.*)
-    const targetUrl = `${IIKO_BASE_URL}/${urlPath}`;
+// === МАРШРУТ 2: Универсальный прокси (ИСПРАВЛЕННЫЙ) ===
+// Мы используем app.use — это самый надежный способ, он не ломается из-за версий
+app.use('/proxy', async (req, res) => {
+    // В app.use переменная req.url содержит только то, что идет ПОСЛЕ /proxy
+    const urlPath = req.url; 
+    const targetUrl = `${IIKO_BASE_URL}${urlPath}`;
     
+    console.log(`Проксируем запрос на: ${targetUrl}`); // Лог для проверки
+
     try {
         const response = await axios({
             method: req.method,
             url: targetUrl,
-            data: req.body, // Пересылаем тело запроса
+            data: req.body,
             headers: {
-                // Пересылаем заголовок авторизации (токен), если он есть
                 'Authorization': req.headers['authorization']
             }
         });
         
         res.json(response.data);
     } catch (error) {
-        // Если IIKO вернул ошибку, передаем её на фронтенд
         if (error.response) {
             res.status(error.response.status).json(error.response.data);
         } else {
