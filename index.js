@@ -42,8 +42,9 @@ app.post('/auth', async (req, res) => {
 
 // === МАРШРУТ 2: Универсальный прокси (для получения меню, заказов и т.д.) ===
 // Пример вызова: ваш_сайт -> /proxy/api/1/organizations -> сервер IIKO
-app.all('/proxy/*', async (req, res) => {
-    const urlPath = req.params[0]; // Берем всё, что написано после /proxy/
+// ОБРАТИТЕ ВНИМАНИЕ: мы заменили '/proxy/*' на '/proxy/(.*)'
+app.all('/proxy/(.*)', async (req, res) => {
+    const urlPath = req.params[0]; // Это сработает правильно с (.*)
     const targetUrl = `${IIKO_BASE_URL}/${urlPath}`;
     
     try {
